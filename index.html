@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caught in the Unit Circle</title>
+<meta name="description" content="Unit Circle Art project: a spider web unit circle with every key angle, coordinate, and sine, cosine and tangent value.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0c14;
+    --panel: #1b1624;
+    --panel-2: #241d31;
+    --line: #3a3048;
+    --text: #ece6f3;
+    --muted: #a99bbb;
+    --orange: #ff8a2a;
+    --purple: #b57cff;
+    --web: #6d6280;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse at top, #2a1d3d 0%, transparent 60%),
+      var(--bg);
+    color: var(--text);
+    font-family: "Nunito", system-ui, sans-serif;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+
+  header { text-align: center; padding: 56px 0 24px; position: relative; }
+  header .thread {
+    position: absolute; left: 50%; top: 0; width: 1px; height: 46px;
+    background: var(--web);
+  }
+  h1 {
+    font-family: "Creepster", cursive;
+    font-weight: 400;
+    font-size: clamp(2.6rem, 8vw, 5rem);
+    letter-spacing: 2px;
+    margin: 0;
+    color: var(--orange);
+    text-shadow: 0 0 24px rgba(255, 138, 42, .35);
+  }
+  .sub { color: var(--muted); margin: 6px 0 0; font-size: 1.05rem; }
+  .tag {
+    display: inline-block; margin-top: 14px; padding: 4px 12px;
+    border: 1px solid var(--line); border-radius: 999px;
+    color: var(--purple); font-weight: 600; font-size: .9rem;
+  }
+
+  nav { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 18px 0 36px; }
+  nav a {
+    color: var(--text); text-decoration: none; font-weight: 600;
+    padding: 6px 14px; border-radius: 999px; background: var(--panel);
+    border: 1px solid var(--line);
+  }
+  nav a:hover { border-color: var(--orange); color: var(--orange); }
+
+  section { margin: 0 0 40px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 16px; padding: 24px;
+  }
+  h2 {
+    font-family: "Creepster", cursive; font-weight: 400;
+    font-size: 2.1rem; letter-spacing: 1px; margin: 0 0 14px;
+    color: var(--purple);
+  }
+  h3 { margin: 18px 0 6px; color: var(--orange); }
+  p { margin: 0 0 12px; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+  @media (max-width: 820px) { .two { grid-template-columns: 1fr; } }
+
+  .drawing img {
+    width: 100%; height: auto; display: block; border-radius: 10px;
+    border: 1px solid var(--line);
+  }
+  .caption { color: var(--muted); font-size: .92rem; margin-top: 10px; }
+
+  /* interactive circle */
+  .circle-box svg { width: 100%; height: auto; display: block; }
+  .pt { cursor: pointer; }
+  .pt circle { fill: var(--orange); stroke: var(--bg); stroke-width: 2; transition: r .15s; }
+  .pt:hover circle, .pt.on circle { fill: var(--purple); r: 9; }
+  .pt text { fill: var(--muted); font-size: 13px; font-family: "Nunito", sans-serif; pointer-events: none; }
+  .pt.on text { fill: var(--text); font-weight: 800; }
+  .readout {
+    background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  }
+  .readout div { text-align: center; }
+  .readout b { display: block; font-size: .78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .readout span.v { font-size: 1.25rem; font-weight: 800; }
+  .readout .wide { grid-column: span 3; }
+  .hint { color: var(--muted); font-size: .9rem; margin: 10px 0 0; text-align: center; }
+
+  /* fractions */
+  .f { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; line-height: 1.05; margin: 0 1px; }
+  .f > span:first-child { border-bottom: 1.5px solid currentColor; padding: 0 2px; }
+  .f > span { font-size: .85em; }
+
+  /* table */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; min-width: 620px; }
+  th, td { padding: 9px 10px; text-align: center; border-bottom: 1px solid var(--line); }
+  th { color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: 1px; }
+  td.deg { font-weight: 800; }
+  td.rad { color: var(--purple); font-weight: 600; }
+  td.xy { color: var(--orange); font-weight: 600; }
+  tr.q td { border-bottom: 2px solid var(--web); }
+  tbody tr:hover { background: var(--panel-2); }
+  .undef { color: var(--muted); font-style: italic; }
+
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 8px; }
+  .fact { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .fact h3 { margin-top: 0; font-size: 1.05rem; }
+  .fact p { margin: 0; color: var(--text); }
+
+  .quad { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; max-width: 360px; margin: 10px auto 0; }
+  .quad div { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px; text-align: center; }
+  .quad b { color: var(--orange); font-size: 1.3rem; display: block; }
+
+  footer { text-align: center; color: var(--muted); padding: 10px 0 40px; font-size: .9rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="thread"></div>
+    <h1>Caught in the Unit Circle</h1>
+    <p class="sub">A spider web unit circle: every strand is an angle, every corner is a point.</p>
+    <span class="tag">Trigonometry · Unit 2 Project: Unit Circle Art</span>
+  </header>
+
+  <nav>
+    <a href="#art">The Art</a>
+    <a href="#explore">Explore It</a>
+    <a href="#values">All Values</a>
+    <a href="#summary">Summary</a>
+    <a href="#reflection">Reflection</a>
+  </nav>
+
+  <section id="art" class="two">
+    <div class="card drawing">
+      <h2>The Web</h2>
+      <img src="drawing.jpg" alt="Hand-drawn spider web unit circle with degrees, radians in purple, and coordinates in orange, with a cartoon spider in the center and a bug caught in the web">
+      <p class="caption">Original drawing. Degrees are in pencil, radians in purple, and coordinates (cos θ, sin θ) in orange. Each web strand from the spider out to the edge is one of the 16 key angles.</p>
+    </div>
+    <div class="card">
+      <h2>Why a Spider Web?</h2>
+      <p>A spider web already looks like a unit circle. The strands come out of one center point, just like angles start at the origin, and the rings of silk go around in circles.</p>
+      <p>The spider sits at the origin <b>(0, 0)</b>. Every strand is a <b>terminal side</b> of an angle, and where it meets the outside of the web is a point <b>(cos θ, sin θ)</b> on the circle.</p>
+      <p>The bug caught near 330° is a reminder that the spider is always "hunting" for the right coordinates.</p>
+      <h3>Color Key</h3>
+      <p><b>Pencil</b> = degrees &nbsp;·&nbsp; <b style="color:var(--purple)">Purple</b> = radians &nbsp;·&nbsp; <b style="color:var(--orange)">Orange</b> = coordinates</p>
+    </div>
+  </section>
+
+  <section id="explore" class="card">
+    <h2>Explore the Web</h2>
+    <div class="two">
+      <div class="circle-box"><svg id="circle" viewBox="-230 -230 460 460" role="img" aria-label="Interactive unit circle"></svg></div>
+      <div>
+        <div class="readout" id="readout">
+          <div class="wide"><b>Angle</b><span class="v" id="r-angle"></span></div>
+          <div class="wide"><b>Point on the circle</b><span class="v" id="r-xy" style="color:var(--orange)"></span></div>
+          <div><b>sin θ</b><span class="v" id="r-sin"></span></div>
+          <div><b>cos θ</b><span class="v" id="r-cos"></span></div>
+          <div><b>tan θ</b><span class="v" id="r-tan"></span></div>
+        </div>
+        <p class="hint">Tap any point on the web to see its values.</p>
+        <h3>Which values are positive? (All Students Take Calculus)</h3>
+        <div class="quad">
+          <div><b>S</b>Quadrant II<br>only sin +</div>
+          <div><b>A</b>Quadrant I<br>all +</div>
+          <div><b>T</b>Quadrant III<br>only tan +</div>
+          <div><b>C</b>Quadrant IV<br>only cos +</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="values" class="card">
+    <h2>Every Key Angle</h2>
+    <p>All 16 key angles with degrees, radians, coordinates, and sine, cosine and tangent. Thicker lines separate the quadrants.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Degrees</th><th>Radians</th><th>Coordinates (x, y)</th><th>sin θ = y</th><th>cos θ = x</th><th>tan θ = y/x</th></tr></thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="summary" class="card">
+    <h2>Written Summary</h2>
+    <p>The <b>unit circle</b> is a circle with a radius of 1 centered at the origin (0, 0). It connects angles to the trig functions: for any angle θ, the point where the angle's terminal side crosses the circle is <b>(cos θ, sin θ)</b>. So the x-coordinate is the cosine, the y-coordinate is the sine, and the tangent is sine divided by cosine (y ÷ x).</p>
+    <div class="facts">
+      <div class="fact"><h3>Degrees and Radians</h3><p>A full circle is 360°, which equals 2π radians. To convert, multiply degrees by π/180. For example, 60° × π/180 = π/3.</p></div>
+      <div class="fact"><h3>Three Special Angles</h3><p>30°, 45° and 60° in Quadrant I give every value on the circle. The values come from the 30-60-90 and 45-45-90 special right triangles.</p></div>
+      <div class="fact"><h3>Reference Angles</h3><p>Every other angle is a reflection of a Quadrant I angle. 150°, 210° and 330° all have the same values as 30°. Only the signs change.</p></div>
+      <div class="fact"><h3>Signs by Quadrant</h3><p>x is negative on the left, y is negative on the bottom. That is why "All Students Take Calculus" tells you which functions are positive.</p></div>
+      <div class="fact"><h3>Undefined Tangent</h3><p>At 90° and 270°, x = 0. Since tan θ = y ÷ x, you would divide by zero, so tangent is undefined there.</p></div>
+      <div class="fact"><h3>Why the Radius Is 1</h3><p>With a hypotenuse of 1, sin = opposite/1 and cos = adjacent/1, so the sides of the triangle are the sine and cosine. That makes x² + y² = 1 for every point.</p></div>
+    </div>
+  </section>
+
+  <section id="reflection" class="card">
+    <h2>Reflection</h2>
+    <p>I chose a spider web because it is almost Halloween and because a web is built just like the unit circle: straight strands out from the center and rings around it. I drew the web first, then placed the 16 angles on the strands, and used three colors so the degrees, radians and coordinates would be easy to tell apart.</p>
+    <p>The hardest part was fitting everything on one sheet of paper and keeping the signs right in Quadrants III and IV. I made some mistakes there and had to fix them, which helped me notice that the numbers repeat in every quadrant and only the signs change.</p>
+    <p>When I checked my work against the rubric, I saw I had left out tangent and the summary. Instead of starting over, I taped the drawing onto a bigger poster so I had room for the full sin, cos and tan table and this write-up. If I did it again, I would plan the layout first and leave more space around the circle.</p>
+  </section>
+
+  <footer>Caught in the Unit Circle · Trigonometry Unit 2 Project</footer>
+</div>
+
+<script>
+  // [degrees, radians, cos, sin, tan]; "u" = undefined
+  const A = [
+    [0, "0", "1", "0", "0"],
+    [30, "π/6", "√3/2", "1/2", "√3/3"],
+    [45, "π/4", "√2/2", "√2/2", "1"],
+    [60, "π/3", "1/2", "√3/2", "√3"],
+    [90, "π/2", "0", "1", "u"],
+    [120, "2π/3", "-1/2", "√3/2", "-√3"],
+    [135, "3π/4", "-√2/2", "√2/2", "-1"],
+    [150, "5π/6", "-√3/2", "1/2", "-√3/3"],
+    [180, "π", "-1", "0", "0"],
+    [210, "7π/6", "-√3/2", "-1/2", "√3/3"],
+    [225, "5π/4", "-√2/2", "-√2/2", "1"],
+    [240, "4π/3", "-1/2", "-√3/2", "√3"],
+    [270, "3π/2", "0", "-1", "u"],
+    [300, "5π/3", "1/2", "-√3/2", "-√3"],
+    [315, "7π/4", "√2/2", "-√2/2", "-1"],
+    [330, "11π/6", "√3/2", "-1/2", "-√3/3"],
+  ];
+
+  function fmt(s) {
+    if (s === "u") return '<span class="undef">undefined</span>';
+    let sign = "";
+    if (s[0] === "-") { sign = "−"; s = s.slice(1); }
+    if (!s.includes("/")) return sign + s;
+    const [n, d] = s.split("/");
+    return sign + '<span class="f"><span>' + n + '</span><span>' + d + '</span></span>';
+  }
+  const pair = (x, y) => "(" + fmt(x) + ", " + fmt(y) + ")";
+
+  // table, with 360° added to close the circle
+  const rows = A.map(([deg, rad, c, s, t]) =>
+    `<tr><td class="deg">${deg}°</td><td class="rad">${fmt(rad)}</td><td class="xy">${pair(c, s)}</td><td>${fmt(s)}</td><td>${fmt(c)}</td><td>${fmt(t)}</td></tr>`
+  );
+  rows.push(`<tr><td class="deg">360°</td><td class="rad">2π</td><td class="xy">(1, 0)</td><td>0</td><td>1</td><td>0</td></tr>`);
+  document.getElementById("tbody").innerHTML = rows.join("");
+  // quadrant divider lines after 60°, 150°, 240°, 330°
+  [...document.querySelectorAll("#tbody tr")].forEach((tr, i) => {
+    if ([3, 7, 11, 15].includes(i)) tr.classList.add("q");
+  });
+
+  // interactive web
+  const svg = document.getElementById("circle");
+  const NS = "http://www.w3.org/2000/svg";
+  const R = 160;
+  const el = (tag, attrs) => {
+    const e = document.createElementNS(NS, tag);
+    for (const k in attrs) e.setAttribute(k, attrs[k]);
+    return e;
+  };
+  const web = "var(--web)";
+  // web rings: polygons through the 16 strands, sagging slightly like silk
+  for (let k = 1; k <= 5; k++) {
+    const r = R * k / 5;
+    let d = "";
+    A.forEach(([deg], i) => {
+      const a1 = deg * Math.PI / 180;
+      const a2 = (A[(i + 1) % 16][0] || 360) * Math.PI / 180;
+      const x1 = r * Math.cos(a1), y1 = -r * Math.sin(a1);
+      const x2 = r * Math.cos(a2), y2 = -r * Math.sin(a2);
+      const mid = (a1 + a2) / 2, rm = r * 0.9;
+      const cx = rm * Math.cos(mid), cy = -rm * Math.sin(mid);
+      d += (i === 0 ? `M${x1},${y1}` : "") + ` Q${cx},${cy} ${x2},${y2}`;
+    });
+    svg.appendChild(el("path", { d, fill: "none", stroke: web, "stroke-width": k === 5 ? 1.5 : 1, opacity: k === 5 ? 1 : .7 }));
+  }
+  // axes
+  svg.appendChild(el("line", { x1: -205, y1: 0, x2: 205, y2: 0, stroke: "var(--muted)", "stroke-width": 1 }));
+  svg.appendChild(el("line", { x1: 0, y1: -205, x2: 0, y2: 205, stroke: "var(--muted)", "stroke-width": 1 }));
+  // true unit circle
+  svg.appendChild(el("circle", { cx: 0, cy: 0, r: R, fill: "none", stroke: "var(--orange)", "stroke-width": 2, opacity: .55 }));
+  // strands + highlight ray
+  A.forEach(([deg]) => {
+    const a = deg * Math.PI / 180;
+    svg.appendChild(el("line", { x1: 0, y1: 0, x2: R * Math.cos(a), y2: -R * Math.sin(a), stroke: web, "stroke-width": 1 }));
+  });
+  const ray = el("line", { x1: 0, y1: 0, stroke: "var(--purple)", "stroke-width": 3, "stroke-linecap": "round" });
+  const drop = el("line", { stroke: "var(--orange)", "stroke-width": 2, "stroke-dasharray": "4 4" });
+  svg.appendChild(drop); svg.appendChild(ray);
+  // spider at the origin
+  const sp = el("g", {});
+  for (let i = 0; i < 8; i++) {
+    const a = (i < 4 ? -50 + i * 33 : 130 + (i - 4) * 33) * Math.PI / 180;
+    sp.appendChild(el("path", { d: `M0,0 Q${18 * Math.cos(a)},${-18 * Math.sin(a) - 8} ${26 * Math.cos(a)},${-26 * Math.sin(a) + 6}`, stroke: "#ece6f3", "stroke-width": 2, fill: "none" }));
+  }
+  sp.appendChild(el("circle", { cx: 0, cy: 0, r: 9, fill: "#ece6f3" }));
+  sp.appendChild(el("circle", { cx: -3, cy: -2, r: 2, fill: "#0f0c14" }));
+  sp.appendChild(el("circle", { cx: 3, cy: -2, r: 2, fill: "#0f0c14" }));
+  svg.appendChild(sp);
+
+  const pts = [];
+  A.forEach((row, i) => {
+    const [deg, rad] = row;
+    const a = deg * Math.PI / 180;
+    const x = R * Math.cos(a), y = -R * Math.sin(a);
+    const g = el("g", { class: "pt", tabindex: 0 });
+    g.appendChild(el("circle", { cx: x, cy: y, r: 6 }));
+    const t = el("text", { x: 190 * Math.cos(a), y: -190 * Math.sin(a) + 4, "text-anchor": "middle" });
+    t.textContent = deg + "°";
+    g.appendChild(t);
+    g.addEventListener("click", () => pick(i));
+    g.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") pick(i); });
+    svg.appendChild(g);
+    pts.push({ g, x, y });
+  });
+
+  function pick(i) {
+    const [deg, rad, c, s, t] = A[i];
+    pts.forEach((p, j) => p.g.classList.toggle("on", j === i));
+    const { x, y } = pts[i];
+    ray.setAttribute("x2", x); ray.setAttribute("y2", y);
+    drop.setAttribute("x1", x); drop.setAttribute("y1", y);
+    drop.setAttribute("x2", x); drop.setAttribute("y2", 0);
+    document.getElementById("r-angle").innerHTML = deg + "° = " + fmt(rad) + (deg === 0 ? " (or 360° = 2π)" : "");
+    document.getElementById("r-xy").innerHTML = pair(c, s);
+    document.getElementById("r-sin").innerHTML = fmt(s);
+    document.getElementById("r-cos").innerHTML = fmt(c);
+    document.getElementById("r-tan").innerHTML = fmt(t);
+  }
+  pick(1);
+</script>
+</body>
+</html>
